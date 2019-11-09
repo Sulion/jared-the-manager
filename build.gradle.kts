@@ -4,9 +4,9 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     groovy
+    application
     kotlin("jvm") version "1.3.50"
     id("com.github.johnrengelman.shadow") version "5.1.0"
-    application
 }
 
 group = "io.github.sulion"
@@ -45,19 +45,12 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
 }
 
-tasks {
-    named<ShadowJar>("shadowJar") {
-        archiveBaseName.set("${project.name}")
-        mergeServiceFiles()
-        manifest {
-            attributes(mapOf("Main-Class" to "io.ktor.server.netty.EngineMain"))
-        }
-    }
-}
-
-
-tasks {
-    "build" {
-        dependsOn(shadowJar)
+tasks.withType<Jar> {
+    manifest {
+        attributes(
+            mapOf(
+                "Main-Class" to application.mainClassName
+            )
+        )
     }
 }

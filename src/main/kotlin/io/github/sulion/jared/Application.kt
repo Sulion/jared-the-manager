@@ -2,6 +2,7 @@ package io.github.sulion.jared
 
 import com.fasterxml.jackson.core.JsonParseException
 import io.ktor.application.Application
+import io.ktor.application.application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.features.*
@@ -37,7 +38,8 @@ fun Application.main() {
     }
     install(Routing) {
         get("/") {
-            call.respondText("Use POST method to convert working hours data to human-readable text", ContentType.Text.Plain)
+
+            call.respondText("Use POST method to convert working hours data to human-readable text.", ContentType.Text.Plain)
         }
     }
 }
