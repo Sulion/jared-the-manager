@@ -1,5 +1,4 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 
 plugins {
@@ -18,7 +17,6 @@ application {
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -32,6 +30,7 @@ dependencies {
     testCompile("junit", "junit", "4.12")
     compile(ktor())
     compile(ktor("server-netty"))
+    compile( "org.telegram:telegrambots:4.3.1")
     implementation(ktor("jackson"))
     compile("ch.qos.logback:logback-classic:$logbackVersion")
     compile( "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
