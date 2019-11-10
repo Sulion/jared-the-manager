@@ -26,7 +26,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi
 import java.util.zip.DataFormatException
 
 
-@UseExperimental(KtorExperimentalAPI::class)
+@KtorExperimentalAPI
 fun Application.main() {
     install(DefaultHeaders)
     install(CallLogging)

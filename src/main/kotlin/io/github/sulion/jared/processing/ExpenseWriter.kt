@@ -6,7 +6,6 @@ import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
-import java.time.ZoneOffset
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import javax.sql.DataSource
@@ -22,7 +21,7 @@ class ExpenseWriter(private val dataSource: DataSource) {
                 it[amount] = record.amount
                 it[authorizedBy] = record.authorizedBy
                 it[category] = record.category.name
-                it[transactionDate] = DateTime(record.date.atStartOfDay().toEpochSecond(ZoneOffset.UTC))
+                it[transactionDate] = DateTime.parse(record.date.toString())
                 it[comment] = record.comment
             }
         }

@@ -30,6 +30,6 @@ object Expenses : Table() {
     val authorizedBy = text("AUTHORIZED_BY")
     val amount = decimal(name = "AMOUNT", precision = 10, scale = 2)
     val category = text("CATEGORY")
-    val transactionDate = date("TRANSACTION_DATE")
+    val transactionDate = datetime("TRANSACTION_DATE")
     val comment = text("COMMENT")
 }
