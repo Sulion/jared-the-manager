@@ -14,6 +14,11 @@ data class ExpenseRecord(
     val date: LocalDate
 )
 
+data class Clarification(
+    val field: String,
+    val value: String
+)
+
 enum class ExpenseCategory {
     GROCERY, HEALTH, SELFCARE, TRAVEL, LUNCH, EVENTS, GIFTS, CLOTHES
 }

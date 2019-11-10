@@ -2,6 +2,7 @@ package io.github.sulion.jared.processing
 
 import io.github.sulion.jared.data.ExpenseCategory
 import io.github.sulion.jared.data.ExpenseRecord
+import org.apache.commons.lang3.math.NumberUtils
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatterBuilder
@@ -15,14 +16,28 @@ val DATE_PATTERN = DateTimeFormatterBuilder()
     .toFormatter()
 
 class PhraseParser {
-    fun parseExpenseMessage(user: String, message: String): ExpenseRecord {
-        val groups = VALID_MSG_PATTERN.matchEntire(message)!!.groupValues
-        return ExpenseRecord(
-            amount = BigDecimal(groups[1]),
-            authorizedBy = user,
-            category = ExpenseCategory.valueOf(groups[2].toUpperCase()),
-            date = LocalDate.parse(groups[3], DATE_PATTERN),
-            comment = message
-        )
-    }
+    fun parseExpenseMessage(user: String, message: String): ExpenseRecord? =
+        VALID_MSG_PATTERN.matchEntire(message)
+            ?.groupValues
+            ?.let { toResult(it, user, message) }
+
+    private fun toResult(
+        params: List<String>,
+        user: String,
+        message: String
+    ): ExpenseRecord? =
+        if (validate(params)) {
+            ExpenseRecord(
+                amount = BigDecimal(params[1].replace(",", ".")),
+                authorizedBy = user,
+                category = ExpenseCategory.valueOf(params[2].toUpperCase()),
+                date = LocalDate.parse(params[3], DATE_PATTERN),
+                comment = message
+            )
+        } else null
+
+    private fun validate(params: List<String>): Boolean =
+        params.size >= 4 &&
+                NumberUtils.isParsable(params[1].replace(",", ".")) &&
+                params[2] in ExpenseCategory.values().map { it.name.toLowerCase() }
 }

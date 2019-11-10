@@ -38,6 +38,7 @@ dependencies {
     compile("org.telegram:telegrambots:4.3.1")
     implementation(ktor("jackson"))
     compile("ch.qos.logback:logback-classic:$logbackVersion")
+    compile("org.apache.commons:commons-lang3:3.9")
     compile("com.fasterxml.jackson.core:jackson-databind:$jacksonVersion")
     compile("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     compile("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")

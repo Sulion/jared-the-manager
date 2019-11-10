@@ -19,9 +19,19 @@ class MessageProcessingTest extends Specification {
                 record.authorizedBy == user &&
                 record.category == ExpenseCategory.valueOf(category)
         where:
-        authorized | message             || amount | category  | user   | date
-        "anna"     | "89€ grocery 06.10" || 89     | "GROCERY" | "anna" | "2019-10-06"
+        authorized | message                 || amount | category   | user      | date
+        "anna"     | "89€ grocery 06.10"     || 89     | "GROCERY"  | "anna"    | "2019-10-06"
+        "michael"  | "89,74€ selfcare 23.12" || 89.74  | "SELFCARE" | "michael" | "2019-12-23"
+    }
 
+    def "don't fail horribly on invalid messages"() {
+        given:
+        def record = parser.parseExpenseMessage(authorized, message)
+        expect:
+        record == null
+        where:
+        authorized | message
+        "anna"     | "some garbage"
     }
 
     def toRecord(String param) {
