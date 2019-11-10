@@ -1,6 +1,7 @@
 package io.github.sulion.jared.bot
 
 import io.github.sulion.jared.data.ExpenseCategory
+import io.github.sulion.jared.processing.ExpenseWriter
 import io.github.sulion.jared.processing.PhraseParser
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
@@ -10,7 +11,10 @@ import org.telegram.telegrambots.meta.api.objects.Update
 
 const val MY_NAME = "jared_bot"
 
-class JaredBot(private val config: Config) : TelegramLongPollingBot() {
+class JaredBot(
+    private val config: Config,
+    private val expenseWriter: ExpenseWriter
+) : TelegramLongPollingBot() {
     val parser = PhraseParser()
     override fun getBotUsername(): String = MY_NAME
 
@@ -26,7 +30,10 @@ class JaredBot(private val config: Config) : TelegramLongPollingBot() {
                         .let { r ->
                             when (r) {
                                 null -> "I don't understand... What do you mean \"${update.message.text}\"\n Currently I understand only ${categories()} as categories."
-                                else -> "Have you spent ${r.amount} euro on ${r.category.name.toLowerCase()}? Good for you!"
+                                else -> {
+                                    expenseWriter.writeExpense(update.message.messageId, r)
+                                    "Have you spent ${r.amount} euro on ${r.category.name.toLowerCase()}? Good for you!"
+                                }
                             }
                         }
                     when (update.message.from.userName) {

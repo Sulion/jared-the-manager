@@ -21,6 +21,7 @@ application {
 }
 
 repositories {
+    jcenter()
     mavenCentral()
 }
 
@@ -28,6 +29,8 @@ dependencies {
     val ktorVersion = "1.2.2"
     val logbackVersion = "1.2.1"
     val jacksonVersion = "2.9.8"
+    val exposedVersion = "0.17.1"
+    val postgresqlVersion = "42.2.8"
     fun ktor(module: String) = "io.ktor:ktor-$module:$ktorVersion"
     fun ktor() = "io.ktor:ktor:$ktorVersion"
     compile("org.codehaus.groovy:groovy-all:2.3.11")
@@ -44,6 +47,10 @@ dependencies {
     compile("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
     compile("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
+    compile("org.jetbrains.exposed:exposed:$exposedVersion")
+    compile("com.zaxxer:HikariCP:2.7.8")
+    compile("org.flywaydb:flyway-core:6.0.8")
+    implementation("org.postgresql:postgresql:$postgresqlVersion")
     compile("org.codehaus.groovy:groovy-all:2.5.8")
     testCompile("org.spockframework:spock-core:1.2-groovy-2.5")
 }
