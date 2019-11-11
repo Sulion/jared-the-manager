@@ -21,7 +21,7 @@ data class Clarification(
 )
 
 enum class ExpenseCategory {
-    GROCERY, HEALTH, SELFCARE, TRAVEL, LUNCH, EVENTS, GIFTS, CLOTHES
+    GROCERY, HEALTH, SELFCARE, TRAVEL, LUNCH, EVENTS, GIFTS, CLOTHES, RENT
 }
 
 
