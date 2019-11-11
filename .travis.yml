@@ -1,7 +1,7 @@
 sudo: false
 language: java
 jdk: openjdk11
-before_install:
+before_deploy:
   - docker build -t jared-the-manager .
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
