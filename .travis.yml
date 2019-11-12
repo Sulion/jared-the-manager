@@ -1,8 +1,13 @@
 sudo: false
 language: java
 jdk: openjdk11
+install: true
 script:
-  - docker build -t jared-the-manager .
+  - ./gradlew clean build
+jobs:
+  include:
+    - stage: dockerize
+      script: docker build -t jared-the-manager .
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
