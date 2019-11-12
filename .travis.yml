@@ -3,5 +3,6 @@ language: minimal
 install: true
 script:
   - docker build -t jared-the-manager .
+  - docker tag jared-the-manager "jared-the-manager:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER"
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-  - docker push $DOCKER_USERNAME/jared-the-manager
+  - docker push "$DOCKER_USERNAME/jared-the-manager:$TRAVIS_BRANCH-$TRAVIS_BUILD_NUMBER"
