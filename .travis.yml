@@ -3,3 +3,5 @@ language: minimal
 install: true
 script:
   - docker build -t jared-the-manager .
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker push $DOCKER_USERNAME/jared-the-manager
