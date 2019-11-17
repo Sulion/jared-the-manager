@@ -5,12 +5,13 @@ import io.github.sulion.jared.data.ExpenseRecord
 import org.apache.commons.lang3.math.NumberUtils
 import java.math.BigDecimal
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeFormatterBuilder
 import java.time.temporal.ChronoField
 
 val VALID_MSG_PATTERN = """([0-9.,]+)€ ([a-zA-Z]+) .*?([0-9]{2}\.[0-9]{2})""".toRegex()
 
-val DATE_PATTERN = DateTimeFormatterBuilder()
+val DATE_PATTERN: DateTimeFormatter = DateTimeFormatterBuilder()
     .appendPattern("dd.MM")
     .parseDefaulting(ChronoField.YEAR, LocalDate.now().year.toLong())
     .toFormatter()

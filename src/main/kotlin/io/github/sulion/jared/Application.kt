@@ -7,6 +7,7 @@ import com.zaxxer.hikari.HikariDataSource
 import io.github.sulion.jared.bot.Config
 import io.github.sulion.jared.bot.JaredBot
 import io.github.sulion.jared.processing.ExpenseWriter
+import io.github.sulion.jared.report.ReportService
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
@@ -23,11 +24,16 @@ import io.ktor.util.KtorExperimentalAPI
 import org.flywaydb.core.Flyway
 import org.telegram.telegrambots.ApiContextInitializer
 import org.telegram.telegrambots.meta.TelegramBotsApi
+import java.time.LocalDateTime
 import java.util.zip.DataFormatException
 
 
 @KtorExperimentalAPI
 fun Application.main() {
+    val config = HoconApplicationConfig(ConfigFactory.load())
+    val dataSource = hikari(config)
+    Flyway.configure().dataSource(dataSource).load().migrate()
+    val reportService = ReportService(dataSource)
     install(DefaultHeaders)
     install(CallLogging)
     install(StatusPages) {
@@ -52,27 +58,26 @@ fun Application.main() {
         jackson {}
     }
     install(Routing) {
-        get("/") {
+        get("/report/monthly/{year}/{month}") {
+            val today = LocalDateTime.now()
+            val year = call.parameters["year"]?.toInt() ?: today.year
+            val month = call.parameters["month"]?.toInt() ?: today.month.value
             call.respondText(
-                "Use POST method to convert working hours data to human-readable text.",
-                ContentType.Text.Plain
+                contentType = ContentType.Text.Html,
+                status = HttpStatusCode.OK,
+                text = reportService.reportFor(year, month)
             )
         }
     }
-    val config = HoconApplicationConfig(ConfigFactory.load())
-    val flyway = Flyway.configure().dataSource(
-        config.property("ktor.jared.jdbc.url").getString(),
-        config.property("ktor.jared.jdbc.user").getString(),
-        config.property("ktor.jared.jdbc.password").getString()
-    ).load()
-    flyway.migrate()
+
     val botConfig = Config(
         token = config.property("ktor.jared.tg-bot-token").getString(),
+        name = config.property("ktor.jared.tg-bot-name").getString(),
         allowedUsers = config.property("ktor.jared.users").getString().split(",")
     )
     ApiContextInitializer.init()
-    val botsApi = TelegramBotsApi().also {
-        it.registerBot(JaredBot(botConfig, ExpenseWriter(hikari(config))))
+    TelegramBotsApi().also {
+        it.registerBot(JaredBot(botConfig, ExpenseWriter(dataSource)))
     }
 }
 

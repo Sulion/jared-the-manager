@@ -9,14 +9,12 @@ import org.telegram.telegrambots.meta.api.objects.Message
 import org.telegram.telegrambots.meta.api.objects.Update
 
 
-const val MY_NAME = "jared_bot"
-
 class JaredBot(
     private val config: Config,
     private val expenseWriter: ExpenseWriter
 ) : TelegramLongPollingBot() {
-    val parser = PhraseParser()
-    override fun getBotUsername(): String = MY_NAME
+    private val parser = PhraseParser()
+    override fun getBotUsername(): String = config.name
 
     override fun getBotToken(): String = config.token
 
@@ -50,10 +48,11 @@ class JaredBot(
         text.isNotEmpty() && text[0].isDigit()
 
     private fun categories(): String =
-        ExpenseCategory.values().map { it.name.toLowerCase() }.joinToString(", ")
+        ExpenseCategory.values().joinToString(", ") { it.name.toLowerCase() }
 }
 
 data class Config(
     val token: String,
+    val name: String,
     val allowedUsers: List<String>
 )
