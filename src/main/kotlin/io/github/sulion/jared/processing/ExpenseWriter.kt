@@ -15,6 +15,7 @@ class ExpenseWriter(private val dataSource: DataSource) {
 
     fun writeExpense(msgId: Int, record: ExpenseRecord): Future<*> = executor.submit {
         Database.connect(dataSource)
+
         transaction {
             Expenses.insert {
                 it[id] = msgId
