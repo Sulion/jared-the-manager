@@ -92,7 +92,6 @@ dependencies {
     compile("com.fasterxml.jackson.core:jackson-core:$jacksonVersion")
     compile("com.fasterxml.jackson.core:jackson-annotations:$jacksonVersion")
     compile("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
-    compile("org.jetbrains.exposed:exposed:$exposedVersion")
     compile("org.jooq:jooq:3.12.3")
     compile("org.jooq:jooq-meta:3.12.3")
     compile("org.jooq:jooq-codegen:3.12.3")
