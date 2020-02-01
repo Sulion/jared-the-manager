@@ -1,6 +1,7 @@
 package io.github.sulion.jared.bot
 
 import io.github.sulion.jared.data.ExpenseCategory
+import io.github.sulion.jared.data.ExpenseRecord
 import io.github.sulion.jared.processing.ExpenseWriter
 import io.github.sulion.jared.processing.PhraseParser
 import org.slf4j.LoggerFactory
@@ -21,29 +22,70 @@ class JaredBot(
 
     override fun onUpdateReceived(update: Update) {
         // We check if the update has a message and the message has text
-        if (update.hasMessage() && update.message.hasText() && isExpenseRecord(update.message.text)) {
-            logger.debug("Got message: {}", update.message.text)
-            update.message.text.lineSequence()
-                .filter { isExpenseRecord(it) }
-                .forEach {
-                    val record = parser.parseExpenseMessage(update.message.messageId, update.message.from.userName, it)
-                        .let { r ->
-                            when (r) {
-                                null -> "I don't understand... What do you mean \"${update.message.text}\"\n Currently I understand only ${categories()} as categories."
-                                else -> {
-                                    expenseWriter.writeExpense(update.message.from.id, r)
-                                    "Have you spent ${r.amount} euro on ${r.category.name.toLowerCase()}? Good for you!"
-                                }
-                            }
-                        }
-                    when (update.message.from.userName) {
-                        in config.allowedUsers -> SendMessage() // Create a SendMessage object with mandatory fields
-                            .setChatId(update.message.chatId)
-                            .setText(record)
-                            .let { execute<Message, SendMessage>(it) }
-                    }
-                }
+        when (type(update)) {
+            MsgType.ORIGINAL -> handleOriginal(update.message)
+            MsgType.UPDATE -> handleUpdate(update.editedMessage)
+            MsgType.UNKNOWN -> TODO()
         }
+    }
+
+    private fun handleOriginal(message: Message) {
+        logger.debug("Got message: {}", message.text)
+        insertNewExpenseRecord(message)
+    }
+
+    private fun insertNewExpenseRecord(message: Message) {
+        val results: Pair<List<Any>, List<Any>> = message.text.lineSequence()
+            .map { parser.parseExpenseMessage(message.messageId, message.from.userName, it) ?: it }
+            .partition { it is ExpenseRecord }
+        expenseWriter.writeExpense(message.from.id, results.first as List<ExpenseRecord>)
+
+        results.first.forEach { respondOK(message.chatId, it as ExpenseRecord) }
+        results.second.forEach { respondFail(message.chatId, it as String) }
+
+    }
+
+    private fun handleUpdate(message: Message) {
+        logger.debug("Got update message: {}", message.text)
+        expenseWriter.deleteExpense(message.from.id, message.messageId).get()
+        insertNewExpenseRecord(message)
+    }
+
+    private fun respondFail(chatId: Long, text: String) {
+        val msg =
+            "I don't understand... What do you mean \"${text}\"\n Currently I understand only ${categories()} as categories."
+        SendMessage() // Create a SendMessage object with mandatory fields
+            .setChatId(chatId)
+            .setText(msg)
+            .let { execute<Message, SendMessage>(it) }
+    }
+
+    private fun respondOK(chatId: Long, record: ExpenseRecord) {
+        val msg = "Have you spent ${record.amount} euro on ${record.category.name.toLowerCase()}? Good for you!"
+        SendMessage() // Create a SendMessage object with mandatory fields
+            .setChatId(chatId)
+            .setText(msg)
+            .let { execute<Message, SendMessage>(it) }
+    }
+
+    private enum class MsgType { ORIGINAL, UPDATE, UNKNOWN }
+
+    private fun type(update: Update): MsgType {
+        if (
+            update.hasMessage()
+            && update.message.hasText()
+            && isExpenseRecord(update.message.text)
+            && update.message.from.userName in config.allowedUsers
+        ) {
+            return MsgType.ORIGINAL
+        } else if (
+            update.hasEditedMessage() && update.editedMessage.hasText()
+            && isExpenseRecord(update.editedMessage.text)
+            && update.editedMessage.from.userName in config.allowedUsers
+        ) {
+            return MsgType.UPDATE
+        }
+        return MsgType.UNKNOWN
     }
 
     private fun isExpenseRecord(text: String): Boolean =

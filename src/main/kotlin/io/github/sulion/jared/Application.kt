@@ -89,8 +89,8 @@ private fun hikari(config: HoconApplicationConfig): HikariDataSource {
         username = config.property("ktor.jared.jdbc.user").getString()
         password = config.property("ktor.jared.jdbc.password").getString()
         maximumPoolSize = 3
+        connectionTestQuery = "Select 1"
         isAutoCommit = false
-        transactionIsolation = "TRANSACTION_REPEATABLE_READ"
     }
     hikariConfig.validate()
     return HikariDataSource(hikariConfig)
