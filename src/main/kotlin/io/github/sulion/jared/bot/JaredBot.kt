@@ -3,6 +3,7 @@ package io.github.sulion.jared.bot
 import io.github.sulion.jared.data.ExpenseCategory
 import io.github.sulion.jared.processing.ExpenseWriter
 import io.github.sulion.jared.processing.PhraseParser
+import org.slf4j.LoggerFactory
 import org.telegram.telegrambots.bots.TelegramLongPollingBot
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage
 import org.telegram.telegrambots.meta.api.objects.Message
@@ -21,15 +22,16 @@ class JaredBot(
     override fun onUpdateReceived(update: Update) {
         // We check if the update has a message and the message has text
         if (update.hasMessage() && update.message.hasText() && isExpenseRecord(update.message.text)) {
+            logger.debug("Got message: {}", update.message.text)
             update.message.text.lineSequence()
                 .filter { isExpenseRecord(it) }
                 .forEach {
-                    val record = parser.parseExpenseMessage(update.message.from.userName, it)
+                    val record = parser.parseExpenseMessage(update.message.messageId, update.message.from.userName, it)
                         .let { r ->
                             when (r) {
                                 null -> "I don't understand... What do you mean \"${update.message.text}\"\n Currently I understand only ${categories()} as categories."
                                 else -> {
-                                    expenseWriter.writeExpense(update.message.messageId, r)
+                                    expenseWriter.writeExpense(update.message.from.id, r)
                                     "Have you spent ${r.amount} euro on ${r.category.name.toLowerCase()}? Good for you!"
                                 }
                             }
@@ -49,6 +51,10 @@ class JaredBot(
 
     private fun categories(): String =
         ExpenseCategory.values().joinToString(", ") { it.name.toLowerCase() }
+
+    companion object {
+        val logger = LoggerFactory.getLogger(JaredBot::class.java)
+    }
 }
 
 data class Config(

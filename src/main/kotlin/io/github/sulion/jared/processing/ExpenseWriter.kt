@@ -8,6 +8,7 @@ import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import org.slf4j.LoggerFactory
 import java.sql.Date
+import java.time.Instant
 import java.util.concurrent.Executors
 import java.util.concurrent.Future
 import javax.sql.DataSource
@@ -15,14 +16,17 @@ import javax.sql.DataSource
 class ExpenseWriter(private val dataSource: DataSource) {
     private val executor = Executors.newFixedThreadPool(4)
 
-    fun writeExpense(msgId: Int, record: ExpenseRecord): Future<*> = executor.submit {
+    fun writeExpense(accountId: Int, record: ExpenseRecord): Future<*> = executor.submit {
         with(dataSource.connection) {
             val create: DSLContext = DSL.using(this, SQLDialect.POSTGRES_10, DSL_CONFIG.settings)
             create.transaction { c ->
                 try {
-                    val t = DSL.using(c).insertInto(
+                    logger.info("About to insert: {}", record.toString())
+                    DSL.using(c).insertInto(
                         EXPENSES,
                         EXPENSES.ID,
+                        EXPENSES.ACCOUNT_ID,
+                        EXPENSES.MSG_ID,
                         EXPENSES.AMOUNT,
                         EXPENSES.AUTHORIZED_BY,
                         EXPENSES.CATEGORY,
@@ -30,14 +34,15 @@ class ExpenseWriter(private val dataSource: DataSource) {
                         EXPENSES.COMMENT
                     )
                         .values(
-                            msgId,
+                            generateId(),
+                            record.msgId,
+                            accountId,
                             record.amount,
                             record.authorizedBy,
                             record.category.name,
                             Date.valueOf(record.date),
                             record.comment
                         ).execute()
-                    logger.info(t.toString())
                 } catch (ex: Exception) {
                     logger.error("On write:", ex)
                     throw ex
@@ -45,6 +50,9 @@ class ExpenseWriter(private val dataSource: DataSource) {
             }
         }
     }
+
+    private fun generateId(): Long =
+        Instant.now().toEpochMilli() + (0..1000000).random()
 
     companion object {
         val logger = LoggerFactory.getLogger(ExpenseWriter::class.java)

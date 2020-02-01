@@ -7,6 +7,7 @@ annotation class DefaultConstructor
 
 @DefaultConstructor
 data class ExpenseRecord(
+    val msgId: Int,
     val amount: BigDecimal,
     val authorizedBy: String,
     val category: ExpenseCategory,

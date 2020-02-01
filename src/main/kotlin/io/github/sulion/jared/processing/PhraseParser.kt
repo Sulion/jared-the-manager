@@ -17,18 +17,20 @@ val DATE_PATTERN: DateTimeFormatter = DateTimeFormatterBuilder()
     .toFormatter()
 
 class PhraseParser {
-    fun parseExpenseMessage(user: String, message: String): ExpenseRecord? =
+    fun parseExpenseMessage(msgId: Int, user: String, message: String): ExpenseRecord? =
         VALID_MSG_PATTERN.matchEntire(message)
             ?.groupValues
-            ?.let { toResult(it, user, message) }
+            ?.let { toResult(msgId, it, user, message) }
 
     private fun toResult(
+        msgId: Int,
         params: List<String>,
         user: String,
         message: String
     ): ExpenseRecord? =
         if (validate(params)) {
             ExpenseRecord(
+                msgId = msgId,
                 amount = BigDecimal(params[1].replace(",", ".")),
                 authorizedBy = user,
                 category = ExpenseCategory.valueOf(params[2].toUpperCase()),

@@ -13,7 +13,7 @@ class MessageProcessingTest extends Specification {
 
     def "parse valid messages"() {
         given:
-        def record = parser.parseExpenseMessage(authorized, message)
+        def record = parser.parseExpenseMessage(-1, authorized, message)
         expect:
         record.amount == amount &&
                 record.authorizedBy == user &&
@@ -26,7 +26,7 @@ class MessageProcessingTest extends Specification {
 
     def "don't fail horribly on invalid messages"() {
         given:
-        def record = parser.parseExpenseMessage(authorized, message)
+        def record = parser.parseExpenseMessage(-1, authorized, message)
         expect:
         record == null
         where:

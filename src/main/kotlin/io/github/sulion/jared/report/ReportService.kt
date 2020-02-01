@@ -19,6 +19,7 @@ class ReportService(val dataSource: DataSource) {
                 .orderBy(EXPENSES.TRANSACTION_DATE, EXPENSES.CATEGORY)
                 .fetch().map {
                     ExpenseRecord(
+                        msgId = it.getValue(EXPENSES.MSG_ID),
                         amount = it.getValue(EXPENSES.AMOUNT),
                         authorizedBy = it.getValue(EXPENSES.AUTHORIZED_BY),
                         category = ExpenseCategory.valueOf(it.getValue(EXPENSES.CATEGORY)),

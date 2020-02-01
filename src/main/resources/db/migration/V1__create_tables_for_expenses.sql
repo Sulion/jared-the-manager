@@ -1,6 +1,8 @@
 create table expenses
 (
-    ID               INTEGER PRIMARY KEY,
+    ID               BIGINT PRIMARY KEY,
+    ACCOUNT_ID       INTEGER,
+    MSG_ID           INTEGER,
     AUTHORIZED_BY    TEXT,
     AMOUNT           DECIMAL,
     CATEGORY         TEXT,
