@@ -22,6 +22,7 @@ class MessageProcessingTest extends Specification {
         authorized | message                 || amount | category   | user      | date
         "anna"     | "89€ grocery 06.10"     || 89     | "GROCERY"  | "anna"    | "2019-10-06"
         "michael"  | "89,74€ selfcare 23.12" || 89.74  | "SELFCARE" | "michael" | "2019-12-23"
+        "michael" | "89,74€ selfcare 3.12" || 89.74 | "SELFCARE" | "michael" | "2019-12-23"
     }
 
     def "don't fail horribly on invalid messages"() {
