@@ -73,8 +73,8 @@ dependencies {
     val ktorVersion = "1.2.2"
     val logbackVersion = "1.2.1"
     val jacksonVersion = "2.9.8"
-    val exposedVersion = "0.17.1"
     val postgresqlVersion = "42.2.8"
+    val koinVersion = "2.0.1"
     fun ktor(module: String) = "io.ktor:ktor-$module:$ktorVersion"
     fun ktor() = "io.ktor:ktor:$ktorVersion"
     jooqRuntime("org.jooq:jooq-meta-extensions:3.12.3")
@@ -101,6 +101,8 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresqlVersion")
     compile("org.codehaus.groovy:groovy-all:2.5.8")
     testCompile("org.spockframework:spock-core:1.2-groovy-2.5")
+    compile("org.koin:koin-core:$koinVersion")
+    compile("commons-codec:commons-codec:1.14")
 }
 
 
