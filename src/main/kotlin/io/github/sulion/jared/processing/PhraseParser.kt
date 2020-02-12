@@ -1,8 +1,9 @@
 package io.github.sulion.jared.processing
 
-import io.github.sulion.jared.data.ExpenseCategory
 import io.github.sulion.jared.data.ExpenseRecord
 import org.apache.commons.lang3.math.NumberUtils
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -21,7 +22,7 @@ val LAX_DATE_PATTERN: DateTimeFormatter = DateTimeFormatterBuilder()
     .parseDefaulting(ChronoField.YEAR, LocalDate.now().year.toLong())
     .toFormatter()
 
-class PhraseParser {
+class PhraseParser(val classificator: Classificator) {
     fun parseExpenseMessage(msgId: Int, user: String, message: String): ExpenseRecord? =
         VALID_MSG_PATTERN.matchEntire(message)
             ?.groupValues
@@ -34,18 +35,26 @@ class PhraseParser {
         message: String
     ): ExpenseRecord? =
         if (validate(params)) {
-            ExpenseRecord(
-                msgId = msgId,
-                amount = BigDecimal(params[1].replace(",", ".")),
-                authorizedBy = user,
-                category = ExpenseCategory.valueOf(params[2].toUpperCase()),
-                date = LocalDate.parse(params[3], if (params[3].length == 5) DATE_PATTERN else LAX_DATE_PATTERN),
-                comment = message
-            )
+            val category = classificator.classify(params[2].toLowerCase())
+            if (category == null) {
+                logger.error("Category {} is not recognised")
+                null
+            } else {
+                ExpenseRecord(
+                    msgId = msgId,
+                    amount = BigDecimal(params[1].replace(",", ".")),
+                    authorizedBy = user,
+                    category = category,
+                    date = LocalDate.parse(params[3], if (params[3].length == 5) DATE_PATTERN else LAX_DATE_PATTERN),
+                    comment = message
+                )
+            }
         } else null
 
     private fun validate(params: List<String>): Boolean =
         params.size >= 4 &&
-                NumberUtils.isParsable(params[1].replace(",", ".")) &&
-                params[2] in ExpenseCategory.values().map { it.name.toLowerCase() }
+                NumberUtils.isParsable(params[1].replace(",", "."))
+    companion object {
+        val logger: Logger = LoggerFactory.getLogger(PhraseParser::class.java)
+    }
 }

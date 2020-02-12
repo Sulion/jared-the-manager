@@ -22,7 +22,7 @@ application {
 
 jooq {
     version = "3.11.11"
-    "sample"(sourceSets["main"]) {
+    "expenseDb"(sourceSets["main"]) {
         generator {
             name = "org.jooq.codegen.DefaultGenerator"
 
@@ -101,13 +101,22 @@ dependencies {
     implementation("org.postgresql:postgresql:$postgresqlVersion")
     compile("org.codehaus.groovy:groovy-all:2.5.8")
     testCompile("org.spockframework:spock-core:1.2-groovy-2.5")
-    compile("org.koin:koin-core:$koinVersion")
+    testImplementation("io.mockk:mockk:1.9.3")
+    compile("org.koin:koin-ktor:$koinVersion")
+    compile("org.koin:koin-logger-slf4j:$koinVersion")
     compile("commons-codec:commons-codec:1.14")
 }
 
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
+    dependsOn("generateExpenseDbJooqSchemaSource")
+}
+tasks {
+    compileTestGroovy {
+        dependsOn(compileTestKotlin)
+        classpath += compileTestKotlin.get().outputs.files
+    }
 }
 
 tasks.withType<Jar> {

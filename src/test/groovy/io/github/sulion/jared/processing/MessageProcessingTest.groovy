@@ -1,18 +1,21 @@
 package io.github.sulion.jared.processing
 
+
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.sulion.jared.data.ExpenseCategory
 import io.github.sulion.jared.data.ExpenseRecord
+
 import spock.lang.Shared
 import spock.lang.Specification
 
 class MessageProcessingTest extends Specification {
-    def parser = new PhraseParser()
     @Shared
     def mapper = new ObjectMapper()
+    def mocks = new Mocks()
 
     def "parse valid messages"() {
         given:
+        def parser = new PhraseParser(mocks.classificator)
         def record = parser.parseExpenseMessage(-1, authorized, message)
         expect:
         record.amount == amount &&
@@ -22,11 +25,12 @@ class MessageProcessingTest extends Specification {
         authorized | message                 || amount | category   | user      | date
         "anna"     | "89€ grocery 06.10"     || 89     | "GROCERY"  | "anna"    | "2019-10-06"
         "michael"  | "89,74€ selfcare 23.12" || 89.74  | "SELFCARE" | "michael" | "2019-12-23"
-        "michael" | "89,74€ selfcare 3.12" || 89.74 | "SELFCARE" | "michael" | "2019-12-23"
+        "michael"  | "89,74€ selfcare 3.12"  || 89.74  | "SELFCARE" | "michael" | "2019-12-23"
     }
 
     def "don't fail horribly on invalid messages"() {
         given:
+        def parser = new PhraseParser(mocks.classificator)
         def record = parser.parseExpenseMessage(-1, authorized, message)
         expect:
         record == null

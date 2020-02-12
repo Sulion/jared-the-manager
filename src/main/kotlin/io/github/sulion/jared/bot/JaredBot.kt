@@ -13,9 +13,9 @@ import org.telegram.telegrambots.meta.api.objects.Update
 
 class JaredBot(
     private val config: Config,
-    private val expenseWriter: ExpenseWriter
+    private val expenseWriter: ExpenseWriter,
+    private val parser: PhraseParser
 ) : TelegramLongPollingBot() {
-    private val parser = PhraseParser()
     override fun getBotUsername(): String = config.name
 
     override fun getBotToken(): String = config.token
