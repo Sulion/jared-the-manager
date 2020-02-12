@@ -24,11 +24,13 @@ class Classificator(private val dataSource: DataSource) {
 
 
     fun extendClassification(term: String, category: ExpenseCategory) {
+        val preparedTerm = term.toLowerCase().trim()
         dataSource.connection.use {
             DSL.using(it, SQLDialect.POSTGRES_10, DSL_CONFIG.settings).transaction { c ->
                 DSL.using(c)
                     .insertInto(CLASSIFICATOR, CLASSIFICATOR.HASH, CLASSIFICATOR.KEYWORD, CLASSIFICATOR.CATEGORY)
-                    .values(term.digest(), term, category.name.toLowerCase())
+                    .values(preparedTerm.digest(), preparedTerm, category.name.toLowerCase())
+                    .execute()
             }
         }
     }

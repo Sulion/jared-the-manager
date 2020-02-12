@@ -33,6 +33,7 @@ import org.telegram.telegrambots.ApiContextInitializer
 import org.telegram.telegrambots.meta.TelegramBotsApi
 import java.time.LocalDateTime
 import java.util.zip.DataFormatException
+import javax.sql.DataSource
 
 
 @KtorExperimentalAPI
@@ -80,6 +81,9 @@ fun Application.main() {
             )
         }
     }
+    val api: TelegramBotsApi by inject()
+    val jaredBot: JaredBot by inject()
+    api.registerBot(jaredBot)
 }
 
 const val JDBC_URL = "JDBC_URL"
@@ -103,7 +107,7 @@ private fun HoconApplicationConfig.toMap(): Map<String, Any> =
 
 private fun createModule(): Module {
     return module {
-        single {
+        single<DataSource> {
             HikariConfig().apply {
                 driverClassName = "org.postgresql.Driver"
                 jdbcUrl = getProperty(JDBC_URL)
@@ -127,12 +131,10 @@ private fun createModule(): Module {
         }
         single { ExpenseWriter(get()) }
         single { PhraseParser(get()) }
-        single { JaredBot(get(), get(), get()) }
+        single { JaredBot(get(), get(), get(), get()) }
         single {
             ApiContextInitializer.init()
-            TelegramBotsApi().also {
-                it.registerBot(get<JaredBot>())
-            }
+            TelegramBotsApi()
         }
     }
 }
